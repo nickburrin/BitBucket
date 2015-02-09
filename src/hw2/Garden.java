@@ -11,7 +11,7 @@ public class Garden {
 	}
 	
 	public void startDigging(){
-		
+		System.out.println("This is a test");
 	}
 	
 	public void doneDigging(){
