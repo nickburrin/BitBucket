@@ -1,0 +1,177 @@
+[33mcommit 7ec7ccbca28ad132da4acd2da356c56821c6dc92[m
+Author: Nick <nickburrin@utexas.edu>
+Date:   Sun Feb 8 22:45:49 2015 -0600
+
+    Uploading hw2 problems
+
+[1mdiff --git a/.classpath b/.classpath[m
+[1mnew file mode 100644[m
+[1mindex 0000000..fb50116[m
+[1m--- /dev/null[m
+[1m+++ b/.classpath[m
+[36m@@ -0,0 +1,6 @@[m
+[32m+[m[32m<?xml version="1.0" encoding="UTF-8"?>[m
+[32m+[m[32m<classpath>[m
+[32m+[m	[32m<classpathentry kind="src" path="src"/>[m
+[32m+[m	[32m<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>[m
+[32m+[m	[32m<classpathentry kind="output" path="bin"/>[m
+[32m+[m[32m</classpath>[m
+[1mdiff --git a/.project b/.project[m
+[1mnew file mode 100644[m
+[1mindex 0000000..d4d12e5[m
+[1m--- /dev/null[m
+[1m+++ b/.project[m
+[36m@@ -0,0 +1,17 @@[m
+[32m+[m[32m<?xml version="1.0" encoding="UTF-8"?>[m
+[32m+[m[32m<projectDescription>[m
+[32m+[m	[32m<name>HW2</name>[m
+[32m+[m	[32m<comment></comment>[m
+[32m+[m	[32m<projects>[m
+[32m+[m	[32m</projects>[m
+[32m+[m	[32m<buildSpec>[m
+[32m+[m		[32m<buildCommand>[m
+[32m+[m			[32m<name>org.eclipse.jdt.core.javabuilder</name>[m
+[32m+[m			[32m<arguments>[m
+[32m+[m			[32m</arguments>[m
+[32m+[m		[32m</buildCommand>[m
+[32m+[m	[32m</buildSpec>[m
+[32m+[m	[32m<natures>[m
+[32m+[m		[32m<nature>org.eclipse.jdt.core.javanature</nature>[m
+[32m+[m	[32m</natures>[m
+[32m+[m[32m</projectDescription>[m
+[1mdiff --git a/README.txt b/README.txt[m
+[1mdeleted file mode 100644[m
+[1mindex 82489b9..0000000[m
+[1m--- a/README.txt[m
+[1m+++ /dev/null[m
+[36m@@ -1 +0,0 @@[m
+[31m-Nick Burrin[m
+[1mdiff --git a/bin/hw2/CyclicBarrier.class b/bin/hw2/CyclicBarrier.class[m
+[1mnew file mode 100644[m
+[1mindex 0000000..0df99d7[m
+Binary files /dev/null and b/bin/hw2/CyclicBarrier.class differ
+[1mdiff --git a/bin/hw2/FairReadWriteLock.class b/bin/hw2/FairReadWriteLock.class[m
+[1mnew file mode 100644[m
+[1mindex 0000000..6d6468f[m
+Binary files /dev/null and b/bin/hw2/FairReadWriteLock.class differ
+[1mdiff --git a/bin/hw2/Garden.class b/bin/hw2/Garden.class[m
+[1mnew file mode 100644[m
+[1mindex 0000000..79ca15b[m
+Binary files /dev/null and b/bin/hw2/Garden.class differ
+[1mdiff --git a/ee-360p/README.txt b/ee-360p/README.txt[m
+[1mdeleted file mode 100644[m
+[1mindex 82489b9..0000000[m
+[1m--- a/ee-360p/README.txt[m
+[1m+++ /dev/null[m
+[36m@@ -1 +0,0 @@[m
+[31m-Nick Burrin[m
+[1mdiff --git a/src/hw2/CyclicBarrier.java b/src/hw2/CyclicBarrier.java[m
+[1mnew file mode 100644[m
+[1mindex 0000000..dd7d310[m
+[1m--- /dev/null[m
+[1m+++ b/src/hw2/CyclicBarrier.java[m
+[36m@@ -0,0 +1,14 @@[m
+[32m+[m[32mpackage hw2;[m
+[32m+[m
+[32m+[m[32mpublic class CyclicBarrier {[m
+[32m+[m[41m	[m
+[32m+[m	[32mpublic CyclicBarrier(int parties){[m
+[32m+[m[41m		[m
+[32m+[m	[32m}[m
+[32m+[m[41m	[m
+[32m+[m	[32mint await() throws InterruptedException{[m
+[32m+[m[41m		[m
+[32m+[m		[32mreturn -1;[m
+[32m+[m	[32m}[m
+[32m+[m
+[32m+[m[32m}[m
+[1mdiff --git a/src/hw2/FairReadWriteLock.java b/src/hw2/FairReadWriteLock.java[m
+[1mnew file mode 100644[m
+[1mindex 0000000..dfc95be[m
+[1m--- /dev/null[m
+[1m+++ b/src/hw2/FairReadWriteLock.java[m
+[36m@@ -0,0 +1,42 @@[m
+[32m+[m[32mpackage hw2;[m
+[32m+[m
+[32m+[m[32mpublic class FairReadWriteLock{[m
+[32m+[m[41m	[m
+[32m+[m	[32mboolean writing = false;[m
+[32m+[m	[32mint waitingWriters = 0;[m
+[32m+[m	[32mint readers = 0;[m
+[32m+[m[41m	[m
+[32m+[m	[32msynchronized void beginRead(){[m
+[32m+[m[41m		[m
+[32m+[m		[32mtry {[m
+[32m+[m			[32mwhile(writing || waitingWriters > 0)[m
+[32m+[m				[32mwait();[m
+[32m+[m		[32m} catch (InterruptedException e) {}[m
+[32m+[m[41m		[m
+[32m+[m		[32mreaders += 1;[m
+[32m+[m	[32m}[m
+[32m+[m[41m	[m
+[32m+[m	[32msynchronized void endRead(){[m
+[32m+[m		[32mreaders -= 1;[m
+[32m+[m		[32mnotifyAll();[m
+[32m+[m	[32m}[m
+[32m+[m[41m	[m
+[32m+[m	[32msynchronized void beginWrite(){[m
+[32m+[m[41m		[m
+[32m+[m		[32mwaitingWriters += 1;[m
+[32m+[m[41m		[m
+[32m+[m		[32mtry{[m
+[32m+[m			[32mwhile((readers > 0) || (writing = true))[m
+[32m+[m				[32mwait();[m
+[32m+[m		[32m} catch(InterruptedException e){}[m
+[32m+[m[41m		[m
+[32m+[m		[32mwriting = true;[m
+[32m+[m		[32mwaitingWriters -= 1;[m
+[32m+[m		[32m//lock the resource[m
+[32m+[m	[32m}[m
+[32m+[m[41m	[m
+[32m+[m	[32msynchronized void endWrite(){[m
+[32m+[m		[32mwriting = false;[m
+[32m+[m		[32mnotifyAll();[m
+[32m+[m	[32m}[m
+[32m+[m[32m}[m
+[1mdiff --git a/src/hw2/Garden.java b/src/hw2/Garden.java[m
+[1mnew file mode 100644[m
+[1mindex 0000000..d1b1c8e[m
+[1m--- /dev/null[m
+[1m+++ b/src/hw2/Garden.java[m
+[36m@@ -0,0 +1,36 @@[m
+[32m+[m[32mpackage hw2;[m
+[32m+[m
+[32m+[m[32mimport java.util.concurrent.locks.ReentrantLock;[m
+[32m+[m
+[32m+[m[32mpublic class Garden {[m
+[32m+[m	[32mstatic int MAX;[m
+[32m+[m	[32mReentrantLock shovel = new ReentrantLock();[m
+[32m+[m[41m	[m
+[32m+[m	[32mpublic Garden(int max){[m
+[32m+[m		[32mthis.MAX = max;[m
+[32m+[m	[32m}[m
+[32m+[m[41m	[m
+[32m+[m	[32mpublic void startDigging(){[m
+[32m+[m[41m		[m
+[32m+[m	[32m}[m
+[32m+[m[41m	[m
+[32m+[m	[32mpublic void doneDigging(){[m
+[32m+[m[41m		[m
+[32m+[m	[32m}[m
+[32m+[m[41m	[m
+[32m+[m	[32mpublic void startSeeding(){[m
+[32m+[m[41m		[m
+[32m+[m	[32m}[m
+[32m+[m[41m	[m
+[32m+[m	[32mpublic void doneSeeding(){[m
+[32m+[m[41m		[m
+[32m+[m	[32m}[m
+[32m+[m[41m	[m
+[32m+[m	[32mpublic void startFilling(){[m
+[32m+[m[41m		[m
+[32m+[m	[32m}[m
+[32m+[m[41m	[m
+[32m+[m	[32mpublic void doneFilling(){[m
+[32m+[m[41m		[m
+[32m+[m	[32m}[m
+[32m+[m[32m}[m
