@@ -6,7 +6,7 @@ public class CyclicBarrier {
 	public CyclicBarrier(int parties){
 		value = parties;
 	}
-	
+/*	
 	public synchronized void P(){
 		value--;
 		if (value < 0) 
@@ -18,10 +18,16 @@ public class CyclicBarrier {
 		if (value <= 0)
 			notify();
 	}
-	
+*/
+// Random Comment	
 	int await() throws InterruptedException{
-		
-		return -1;
+		value--;
+		if (value == 0){
+			notifyAll();
+		}
+		else
+			this.wait();
+		return value;
 	}
 
 }
