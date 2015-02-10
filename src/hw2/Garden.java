@@ -5,35 +5,34 @@ import java.util.concurrent.locks.*;
 public class Garden {
 	
 	static int MAX;
-	static int empty;
+	static int unfilled;
 	static int planted;
-	static int filled;
 	
 	final ReentrantLock shovel = new ReentrantLock();
-	final Condition maxEmpty = shovel.newCondition();
-	final Condition noneEmpty = shovel.newCondition();
+	final Condition maxUnfilled = shovel.newCondition();
 	final Condition waitingToPlant = shovel.newCondition();
+	final Condition waitingToFill = shovel.newCondition();
 	
 	public Garden(int max){
 		this.MAX = max;
-		this.empty = 0;
-		this.planted = 0; 
-		this.filled = 0; 
+		this.unfilled = 0;
+		this.planted = 0;
 	}
 	
 	/**
-	 * Newton digs the holes. He will only dig a new hole if: empty <= MAX.
+	 * Newton digs the holes. He will only dig a new hole if: unfilled <= MAX.
 	 * He must first grab the shovel.
+	 * ???What happens if Newton cannot dig a hole and Mary wants the shovel? When is shovel unlocked???
 	 */
 	public void startDigging() throws InterruptedException{
 		
 		shovel.lock();
 		
 		try{
-			while(empty >= MAX){
-				maxEmpty.await();
+			while(unfilled >= MAX){
+				maxUnfilled.await();
 			}	
-			//empty += 1;
+			//unfilled += 1;
 			
 		} catch(InterruptedException e) {}
 	}
@@ -47,30 +46,48 @@ public class Garden {
 	}
 	
 	/**
-	 * Benjamin will plant a seed if: empty > 0
+	 * Benjamin will plant a seed if: unfilled > 0
 	 */
 	public void startSeeding(){
 		
 		try{
-			while(empty < 1){
+			while(unfilled < 1){
 				waitingToPlant.await();	
 			}
 			
-			//empty -= 1;
 			//planted += 1;
 		} catch(InterruptedException e){}
 		
 	}
 	
 	public void doneSeeding(){
-		
+		waitingToFill.signal();
 	}
 	
+	/**
+	 * Mary will fill a hole as long as it has been "planted": planted > 0 
+	 */
 	public void startFilling(){
+		shovel.lock();
 		
+		try{
+			while(planted < 1){
+				waitingToFill.await();
+			}	
+			//planted -= 1;
+			//unfilled -= 1;
+			
+		} catch(InterruptedException e) {}
 	}
 	
+	/**
+	 * Mary needs to release the shovel and notify Newton if: filled < MAX
+	 */
 	public void doneFilling(){
+		shovel.unlock();
 		
+		if(unfilled < MAX){
+			maxUnfilled.signal();
+		}
 	}
 }
