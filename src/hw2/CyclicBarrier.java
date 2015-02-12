@@ -27,6 +27,7 @@ public class CyclicBarrier {
 		}
 		else
 			this.wait();
+		
 		return value;
 	}
 
