@@ -2,9 +2,15 @@ package hw2;
 
 public class FairReadWriteLock{
 	
-	boolean writing = false;
-	int waitingWriters = 0;
-	int readers = 0;
+	boolean writing;
+	int waitingWriters;
+	int readers;
+	
+	public FairReadWriteLock(){
+		this.writing = false;
+		this.waitingWriters = 0;
+		this.readers = 0;
+	}
 	
 	synchronized void beginRead(){
 		

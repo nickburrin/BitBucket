@@ -29,7 +29,6 @@ public class Garden {
 	
 		while(unfilled >= MAX){
 			maxUnfilled.await();
-			System.out.println("The max has been reached. Newton is waiting.");
 		}	
 	}
 
@@ -52,7 +51,6 @@ public class Garden {
 		
 		while(unfilled < 1){
 			waitingToPlant.await();
-			System.out.println("There are no holes to fill. Benjamin is waiting.");
 		}
 	}
 
@@ -72,7 +70,6 @@ public class Garden {
 
 		while(planted < 1){
 			waitingToFill.await();
-			System.out.println("There are no planted holes. Mary is waiting.");
 		}
 	}
 
