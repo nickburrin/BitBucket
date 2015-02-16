@@ -1,33 +1,56 @@
 package hw2;
 
-public class CyclicBarrier {
-	int value;
-	
+import java.util.concurrent.Semaphore;
+
+public class CyclicBarrier{
+	static int threads;
+	static int initValue;
+	Semaphore BinarySem;
+	Semaphore CountingSem;
 	public CyclicBarrier(int parties){
-		value = parties;
-	}
-/*	
-	public synchronized void P(){
-		value--;
-		if (value < 0) 
-			Util.myWait(this);
-	}
-	
-	public synchronized void V(){
-		value++;
-		if (value <= 0)
-			notify();
-	}
-*/
-// Random Comment	
-	int await() throws InterruptedException{
-		value--;
-		if (value == 0){
-			notifyAll();
-		}
-		else
-			this.wait();
-		return value;
+		BinarySem = new Semaphore(1);
+		CountingSem = new Semaphore(0);
+		threads = parties;
+		initValue = parties;
 	}
 
+//just need to lock value, initValue, and the acquire and release
+	int await() throws InterruptedException{
+		
+		try{
+			//try to acquire the lock so threads are not decremented at the same time
+			BinarySem.acquire();
+			
+			//decrement number of threads
+			threads--;
+			BinarySem.release();
+			if (threads > 0){
+				
+				CountingSem.acquire();
+				
+			}
+			else{
+				//do we need to reset the threads?
+				BinarySem.acquire();
+				threads = initValue;
+				BinarySem.release();
+				CountingSem.release(initValue);
+				CountingSem.acquire();//if you reuse this, you have to keep this line
+//				System.out.println("before the acquire, there were " + CountingSem.availablePermits() + " remaining");
+//				BinarySem.release();
+			}
+		}catch (InterruptedException e){
+			System.out.println("bonesaw");
+
+		}
+		finally{
+			
+		}
+		
+		return threads;
+		
+		
+	}
 }
+
+
