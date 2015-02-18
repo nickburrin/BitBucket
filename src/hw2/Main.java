@@ -8,13 +8,33 @@ import java.util.concurrent.Future;
 
 public class Main {
 	public static void main(String[] args){
-
+		CyclicMain(5);
 		//Test the FairReadWriteLock class
 		//FairMain();
 		
 		//Test the Garden class
-		GardenMain();	
+//		GardenMain();	
 	}
+	
+	public static void CyclicMain(int N){
+		MyThread t[];
+		
+		CyclicBarrier Cyc = new CyclicBarrier(N);
+        t = new MyThread[N];
+        for (int j=0; j < N; j++){
+        for (int i = 0; i < N; i++) {
+     	
+        	try{
+       		Thread.sleep(500);
+        	}catch (InterruptedException e){
+        		e.printStackTrace();
+        	}
+        	
+     	
+            t[i] = new MyThread(i, Cyc);
+            t[i].start();
+        }
+        }
 	
 	private static void FairMain()
 	{
