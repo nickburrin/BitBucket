@@ -4,6 +4,7 @@ import java.util.concurrent.locks.*;
 
 public class Garden {
 
+	GardenLogger log;
 	static int MAX;
 	int unfilled;
 	int planted;
@@ -14,8 +15,9 @@ public class Garden {
 	final Condition waitingToPlant = seedLock.newCondition();
 	final Condition waitingToFill = shovel.newCondition();
 
-	public Garden(int max){
+	public Garden(int max, GardenLogger gLog){
 		this.MAX = max;
+		this.log = gLog;
 		this.unfilled = 0;
 		this.planted = 0;
 	}
@@ -25,11 +27,18 @@ public class Garden {
 	 * He must first grab the shovel.
 	 */
 	public void startDigging() throws InterruptedException{
+		log.logTryToDig();
+		
 		shovel.lock();
-	
-		while(unfilled >= MAX){
-			maxUnfilled.await();
-		}	
+		
+		try{
+			while(unfilled >= MAX){
+				maxUnfilled.await();
+			}	
+		}
+		finally{
+			shovel.unlock();
+		}
 	}
 
 	/**
@@ -40,17 +49,26 @@ public class Garden {
 		waitingToPlant.signal();
 		seedLock.unlock();
 		
-		shovel.unlock();
+		log.logDoneDigging(unfilled);
+		
+		//shovel.unlock();
 	}
 
 	/**
 	 * Benjamin will plant a seed if: unfilled > 0
 	 */
 	public void startSeeding() throws InterruptedException{
+		log.logTryToPlant();
+		
 		seedLock.lock();
 		
-		while(unfilled < 1){
-			waitingToPlant.await();
+		try{
+			while(unfilled < 1){
+				waitingToPlant.await();
+			}
+		}
+		finally{
+			seedLock.unlock();
 		}
 	}
 
@@ -59,17 +77,26 @@ public class Garden {
 		waitingToFill.signal();
 		shovel.unlock();
 		
-		seedLock.unlock();
+		log.logDonePlanting(planted);
+		
+		//seedLock.unlock();
 	}
 
 	/**
 	 * Mary will fill a hole as long as it has been "planted": planted > 0 
 	 */
 	public void startFilling() throws InterruptedException{
+		log.logTryToFill();
+		
 		shovel.lock();
-
-		while(planted < 1){
-			waitingToFill.await();
+		
+		try{
+			while(planted < 1){
+				waitingToFill.await();
+			}
+		}
+		finally{
+			shovel.unlock();
 		}
 	}
 
@@ -77,9 +104,16 @@ public class Garden {
 	 * Mary needs to release the shovel and notify Newton if: filled < MAX
 	 */
 	public void doneFilling(){
-		if(unfilled < MAX){
-			maxUnfilled.signal();
+		shovel.lock();
+		
+		try{
+			if(unfilled < MAX){
+				maxUnfilled.signal();
+			}
 		}
-		shovel.unlock();
+		finally{
+			log.logDoneFilling(unfilled, planted);
+			shovel.unlock();
+		}
 	}
 }

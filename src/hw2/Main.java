@@ -18,63 +18,83 @@ public class Main {
 	
 	private static void FairMain()
 	{
-		ExecutorService threadPool = Executors.newCachedThreadPool();
-		long begin = System.currentTimeMillis();
 		FairReadWriteLock frwl = new FairReadWriteLock();
 		
+		Writer w1 = new Writer(frwl, 3);
+		Reader r1 = new Reader(frwl, 3);
+		Reader r2 = new Reader(frwl, 3);
 		
-		Writer w = new Writer(frwl, 1, begin);
-		Reader r = new Reader(frwl, 0, begin);
+		Thread write1 = new Thread(w1);
+		Thread read1 = new Thread(r1);
+		Thread read2 = new Thread(r2);
 		
-		Thread write = new Thread(w);
-		Thread read = new Thread(r);
+		read2.start();
+		read1.start();
+		write1.start();
 		
-		write.start();
-		read.start();
-		
-		
-		System.out.println("Reader" + r.timeStamps);
-		System.out.println("Writer" + w.timeStamps);
+		try{
+            write1.join();
+            read1.join();
+            read2.join();
+         } catch(Exception ex){
+            System.out.println("Exception while waiting for join: " + ex.getMessage());
+         }
 	}
 	
 	
 	private static void GardenMain() {
 		
-		Garden garden = new Garden(4);
-	
-		Newton newt = new Newton(garden, 10);
-		Benjamin ben = new Benjamin(garden);
-		Mary mary = new Mary(garden);
+		ExecutorService threadPool = Executors.newCachedThreadPool();
 		
+		GardenLogger gLog = new GardenLogger();
+		Garden garden = new Garden(2, gLog);
+	
+		Newton newt = new Newton(garden, gLog, 3);
+		Benjamin ben = new Benjamin(garden, gLog);
+		Mary mary = new Mary(garden, gLog);
+		
+		/*
 		Thread Newton = new Thread(newt);
 		Thread Benjamin = new Thread(ben);
 		Thread Mary = new Thread(mary);
 		
-		Newton.start();
-		Benjamin.start();
 		Mary.start();
+		Benjamin.start();
+		Newton.start();
+		*/
+		
+		Future<?> f1 = threadPool.submit(newt);
+		Future<?> f2 = threadPool.submit(ben);
+		Future<?> f3 = threadPool.submit(mary);
+		
+		try{
+			f1.get();
+			f2.get();
+			f3.get();
+		} catch(Exception e){e.printStackTrace();}
+		finally{
+			threadPool.shutdown();
+		}
 	}
 }
 
 
-class Writer extends Thread{
+class Writer implements Runnable{
 	FairReadWriteLock lock;
-	TreeMap<Long, String> timeStamps = new TreeMap<Long, String>();
 	int iterations;
-	long begin;
 	
-	public Writer(FairReadWriteLock l, int i, long b){
+	public Writer(FairReadWriteLock l, int i){
 		this.lock = l;
 		this.iterations = i;
-		this.begin = b;
 	}
 	
 	public void run(){
 		while(iterations > 0){
-			timeStamps.put(System.currentTimeMillis() - begin, "Writer in");
 			lock.beginWrite();
+			try {
+				Thread.sleep(6000); //wait time 6sec
+			} catch (InterruptedException e) {e.printStackTrace();} 
 			lock.endWrite();
-			timeStamps.put(System.currentTimeMillis() - begin, "Writer out");
 			
 			iterations -= 1;
 		}
@@ -82,24 +102,22 @@ class Writer extends Thread{
 }
 
 
-class Reader extends Thread{
+class Reader implements Runnable{
 	FairReadWriteLock lock;
-	TreeMap<Long, String> timeStamps = new TreeMap<Long, String>();
 	int iterations;
-	long begin;
 	
-	public Reader(FairReadWriteLock l, int i, long b){
+	public Reader(FairReadWriteLock l, int i){
 		this.lock = l;
 		this.iterations = i;
-		this.begin = b;
 	}
 	
 	public void run(){
 		while(iterations > 0){
-			timeStamps.put(System.currentTimeMillis() - begin, "Reader in");
 			lock.beginRead();
+			try {
+				Thread.sleep(6000); //wait time 6sec
+			} catch (InterruptedException e) {e.printStackTrace();} 
 			lock.endRead();
-			timeStamps.put(System.currentTimeMillis() - begin, "Reader out");
 			
 			iterations -= 1;
 		}
@@ -109,12 +127,11 @@ class Reader extends Thread{
 
 class Newton extends Thread{
 	Garden garden;
-	int MAX;
-	int holes;
+	int iterations;
 	
-	public Newton(Garden g, int m){
+	public Newton(Garden g, GardenLogger l, int i){
 		this.garden = g;
-		this.MAX = m;
+		this.iterations = i;
 	}
 	
 	public void dig(){
@@ -122,13 +139,18 @@ class Newton extends Thread{
 	}
 	
 	public void run(){
-		while(holes < MAX){
+		while(iterations > 0){
 			try{
 				garden.startDigging();
 			} catch(InterruptedException e) {}
 			dig();
+			
+			try {
+				Thread.sleep(3000); //wait time 3sec
+			} catch (InterruptedException e) {e.printStackTrace();} 
 			garden.doneDigging();
-			holes += 1;
+			
+			iterations -= 1;
 		}
 	}
 }
@@ -136,7 +158,7 @@ class Newton extends Thread{
 class Benjamin extends Thread{
 	Garden garden;
 	
-	public Benjamin(Garden g){
+	public Benjamin(Garden g, GardenLogger l){
 		this.garden = g;
 	}
 	
@@ -149,7 +171,13 @@ class Benjamin extends Thread{
 			try{
 				garden.startSeeding();
 			} catch(InterruptedException e){}
+			
 			plantSeed();
+			
+			try {
+				Thread.sleep(3000); //wait time 3sec
+			} catch (InterruptedException e) {e.printStackTrace();} 
+			
 			garden.doneSeeding();
 		}
 	}
@@ -158,13 +186,13 @@ class Benjamin extends Thread{
 class Mary extends Thread{
 	Garden garden;
 	
-	public Mary(Garden g){
+	public Mary(Garden g, GardenLogger l){
 		this.garden = g;
 	}
 	
 	public void Fill(){
 		garden.planted -= 1;
-		garden.unfilled -= 1;		
+		garden.unfilled -= 1;	
 	}
 	
 	public void run(){
@@ -172,7 +200,13 @@ class Mary extends Thread{
 			try{
 				garden.startFilling();
 			} catch(InterruptedException e) {}
+			
 			Fill();
+			
+			try {
+				Thread.sleep(3000); //wait time 3sec
+			} catch (InterruptedException e) {e.printStackTrace();} 
+			
 			garden.doneFilling();
 		}
 	}
