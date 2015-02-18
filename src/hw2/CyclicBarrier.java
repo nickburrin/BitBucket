@@ -34,8 +34,8 @@ public class CyclicBarrier{
 				BinarySem.acquire();
 				threads = initValue;
 				BinarySem.release();
-				CountingSem.release(initValue - 1);
-//				CountingSem.acquire();//if you reuse this, you have to keep this line
+				CountingSem.release(initValue);
+				CountingSem.acquire();//if you reuse this, you have to keep this line
 //				System.out.println("before the acquire, there were " + CountingSem.availablePermits() + " remaining");
 //				BinarySem.release();
 			}
@@ -52,5 +52,6 @@ public class CyclicBarrier{
 		
 	}
 }
+
 
 
